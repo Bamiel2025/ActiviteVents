@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vents & courants marins — Mission météo (collège)</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:#eef6fc;color:#21313f}
+  header{background:linear-gradient(135deg,#1864ab,#0b7285);color:#fff;padding:18px 22px}
+  header h1{margin:0;font-size:1.5rem}
+  header p{margin:6px 0 0;opacity:.92;font-size:.95rem}
+  .tabs{display:flex;gap:8px;padding:14px 16px 0;flex-wrap:wrap}
+  .tab{border:none;background:#d0e7f5;padding:10px 16px;border-radius:12px 12px 0 0;font-size:1rem;font-weight:600;color:#1864ab;cursor:pointer}
+  .tab.active{background:#fff;box-shadow:0 -3px 8px rgba(0,0,0,.08)}
+  main{padding:0 16px 30px}
+  .panel{display:none}
+  .panel.active{display:block}
+  .card{background:#fff;border-radius:0 14px 14px 14px;box-shadow:0 4px 14px rgba(0,0,0,.08);padding:18px}
+  h2{margin:.1em 0 .4em;font-size:1.2rem;color:#1864ab}
+  .consigne{background:#fff9db;border:1px solid #ffe066;border-radius:10px;padding:10px 12px;font-size:.98rem}
+  .mapwrap{margin-top:12px;border:2px solid #cfe3f2;border-radius:12px;overflow:hidden;background:#cde9f9}
+  svg{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none}
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+  .btn{border:none;border-radius:10px;padding:10px 16px;font-size:.98rem;font-weight:700;cursor:pointer;color:#fff}
+  .btn.green{background:#2f9e44}.btn.blue{background:#1971c2}.btn.gray{background:#868e96}
+  .btn:active{transform:scale(.97)}
+  .msg{font-weight:700}
+  .legend{margin-top:10px;font-size:.9rem;color:#41607a;display:flex;gap:16px;flex-wrap:wrap}
+  .swatch{display:inline-block;width:26px;height:8px;border-radius:4px;vertical-align:middle;margin-right:5px}
+  .expl{margin-top:14px;border-left:6px solid #1971c2;background:#e7f3ff;border-radius:10px;padding:12px 14px;font-size:1rem}
+  .expl .moteur{background:#fff3bf;border-radius:8px;padding:8px 10px;margin-top:8px;font-weight:700}
+  .hidden{display:none}
+  #errbox{display:none;margin:10px 16px;background:#fff5f5;border:2px solid #e03131;border-radius:10px;padding:10px;font-size:.9rem}
+  .st circle{fill:#fff;stroke:#343a40;stroke-width:2.5}
+  .st text{font-weight:800;font-size:13px;fill:#212529;pointer-events:none}
+  .st.ok circle{stroke:#2f9e44;fill:#ebfbee}
+  .st.bad circle{stroke:#e03131;fill:#fff5f5}
+  .corr line{stroke-dasharray:12 9;animation:flow 1.1s linear infinite}
+  @keyframes flow{to{stroke-dashoffset:-21}}
+  .flowline{stroke-dasharray:10 8;animation:flow 1s linear infinite}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:14px}
+  .step{border-radius:12px;padding:10px 12px;font-size:.93rem;background:#f1f8ff;border:1px solid #cfe3f2}
+  .step b{color:#1864ab}
+  .quizq{margin-top:12px;background:#f8fbff;border:1px solid #d8e7f3;border-radius:12px;padding:10px 12px}
+  .qbtn{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;border-radius:10px;border:2px solid #cfe3f2;background:#fff;font-size:.95rem;cursor:pointer}
+  .qbtn.good{border-color:#2f9e44;background:#ebfbee}
+  .qbtn.bad{border-color:#e03131;background:#fff5f5}
+  .qfeed{font-weight:700;margin-top:4px}
+  .windtoggle{font-size:.9rem;color:#41607a;display:flex;align-items:center;gap:5px}
+  footer{text-align:center;padding:14px;font-size:.85rem;color:#5b7a94}
+  text{font-family:'Segoe UI',system-ui,sans-serif}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌬️ Vents & 🌊 courants marins — Mission météo</h1>
+  <p>Comprendre le sens du vent et des courants sur de vraies cartes (Atlantique Nord) · Niveau collège</p>
+</header>
+
+<div id="errbox"></div>
+
+<nav class="tabs">
+  <button type="button" class="tab active" data-tab="vent">1 · Vents & isobares</button>
+  <button type="button" class="tab" data-tab="courant">2 · Courants marins</button>
+  <button type="button" class="tab" data-tab="comprendre">3 · Le moteur & correction</button>
+</nav>
+
+<main>
+<!-- ============ ACTIVITÉ 1 ============ -->
+<section id="tab-vent" class="panel active">
+  <div class="card">
+    <h2>Activité 1 — Où souffle le vent ?</h2>
+    <p class="consigne">Carte météo de l'Atlantique Nord avec <b>deux zones de circulation</b>. Chaque zone possède un <b>anticyclone</b> (A, hautes pressions) et une <b>dépression</b> (D, basses pressions).
+      ⚠️ Les deux zones ne sont pas orientées pareil : observe bien la position de A et D dans chaque zone !<br>
+      👉 À partir de chaque point numéroté (<b>2 par zone</b>), <b>glisse pour tracer une flèche</b> indiquant le sens du vent, puis clique sur « Vérifier ».</p>
+    <div class="mapwrap"><svg id="svgVent" viewBox="0 0 1000 640"><text x="500" y="320" text-anchor="middle" fill="#5b7a94">Chargement… Si ce message reste, le JavaScript est bloqué par le navigateur.</text></svg></div>
+    <div class="legend"><span><span class="swatch" style="background:#48699a"></span>Isobares (hPa)</span>
+      <span><b style="color:#1864ab">A</b> = hautes pressions</span><span><b style="color:#c92a2a">D</b> = basses pressions</span></div>
+    <div class="toolbar">
+      <button type="button" id="ventVerify" class="btn green">✔ Vérifier</button>
+      <button type="button" id="ventCorr" class="btn blue">👀 Voir la correction</button>
+      <button type="button" id="ventReset" class="btn gray">↺ Effacer</button>
+      <span id="ventMsg" class="msg"></span>
+    </div>
+    <div id="ventExpl" class="expl hidden">
+      <b>✅ Correction :</b> les flèches bleues animées montrent le sens du vent. Dans <b>chaque zone</b>, le vent souffle des <b>HAUTES pressions (A) vers les BASSES pressions (D)</b>, perpendiculairement aux isobares.
+      Zone 1 : de A₁ vers D₁ (vers le nord). Zone 2 : de A₂ vers D₂ (vers le sud) — l'orientation est différente, il fallait bien regarder !
+      <div class="moteur">🔑 LE MOTEUR DU VENT : la <b>différence de pression</b>, elle-même créée par la <b>différence de température</b> : l'air chaud, plus léger, monte → basses pressions ; l'air froid, plus lourd, descend → hautes pressions. (Voir onglet 3)</div>
+      ➡️ <i>Pour aller plus loin :</i> à cause de la rotation de la Terre, les vents tournent autour des pressions (sens inverse des aiguilles d'une montre autour d'une dépression dans l'hémisphère Nord).
+    </div>
+  </div>
+</section>
+
+<!-- ============ ACTIVITÉ 2 ============ -->
+<section id="tab-courant" class="panel">
+  <div class="card">
+    <h2>Activité 2 — Quel est le sens des courants marins ?</h2>
+    <p class="consigne">Carte des courants marins de l'Atlantique Nord. <span style="color:#e03131"><b>Rouge = courant chaud</b></span>, <span style="color:#1971c2"><b>bleu = courant froid</b></span>.
+      Les <b>flèches grises</b> montrent les <b>vents dominants</b> : rappelle-toi que les vents poussent les courants de surface (c'est un indice !).<br>
+      👉 À partir de chaque point numéroté, <b>glisse pour tracer une flèche</b> indiquant le sens du courant, puis « Vérifier ».</p>
+    <div class="mapwrap"><svg id="svgCourant" viewBox="0 0 1000 640"><text x="500" y="320" text-anchor="middle" fill="#5b7a94">Chargement… Si ce message reste, le JavaScript est bloqué par le navigateur.</text></svg></div>
+    <div class="legend"><span><span class="swatch" style="background:#fa5252"></span>Courant chaud</span>
+      <span><span class="swatch" style="background:#4dabf7"></span>Courant froid</span>
+      <span><span class="swatch" style="background:#78909c"></span>Vents dominants (aide)</span></div>
+    <div class="toolbar">
+      <button type="button" id="courantVerify" class="btn green">✔ Vérifier</button>
+      <button type="button" id="courantCorr" class="btn blue">👀 Voir la correction</button>
+      <button type="button" id="courantReset" class="btn gray">↺ Effacer</button>
+      <label class="windtoggle"><input type="checkbox" id="courantWindToggle" checked> 💨 Vents dominants</label>
+      <span id="courantMsg" class="msg"></span>
+    </div>
+    <div id="courantExpl" class="expl hidden">
+      <b>✅ Correction :</b> les courants <b>chauds</b> (Gulf Stream, dérive nord-atlantique, courant équatorial) partent des régions chaudes (<b>équateur → pôles</b>). Les courants <b>froids</b> (Labrador, Canaries) partent des régions froides (<b>pôles → équateur</b>). Le Gulf Stream adoucit ainsi le climat de l'Europe !
+      <div class="moteur">🔑 MÊME MOTEUR QUE LE VENT : les <b>différences de température</b> (l'eau chaude, plus légère, circule en surface ; l'eau froide, plus dense, plonge) et les <b>vents</b> qui poussent l'eau en surface. La Terre redistribue ainsi la chaleur de l'équateur vers les pôles.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ONGLET 3 ============ -->
+<section id="tab-comprendre" class="panel">
+  <div class="card">
+    <h2>3 · Le moteur : température → pression → mouvement</h2>
+    <p class="consigne">Observe l'animation : c'est le <b>Soleil</b> qui chauffe inégalement la Terre. Les différences de température créent des différences de pression… et l'air (comme l'eau) se déplace des hautes vers les basses pressions.</p>
+    <div class="mapwrap"><svg id="svgAir" viewBox="0 0 900 430"></svg></div>
+    <div class="steps">
+      <div class="step"><b>1.</b> ☀️ Le Soleil chauffe davantage l'équateur que les pôles.</div>
+      <div class="step"><b>2.</b> 🔥 L'air chaud, plus léger, <b>monte</b> → cela crée des <b>basses pressions</b>.</div>
+      <div class="step"><b>3.</b> ❄️ L'air froid, plus lourd, <b>descend</b> → cela crée des <b>hautes pressions</b>.</div>
+      <div class="step"><b>4.</b> 💨 L'air se déplace des hautes vers les basses pressions : c'est le <b>VENT</b>. Dans l'océan, le même moteur + les vents créent les <b>COURANTS</b>.</div>
+    </div>
+    <div class="mapwrap" style="margin-top:14px"><svg id="svgEau" viewBox="0 0 900 300"></svg></div>
+    <h2 style="margin-top:20px">🧠 Petit quiz de vérification</h2>
+    <div id="quiz"></div>
+  </div>
+</section>
+</main>
+<footer>Cartes simplifiées à but pédagogique — Atlantique Nord, d'après les cartes météorologiques et océanographiques réelles.</footer>
+
+<script>
+'use strict';
+/* ================= utilitaires robustes ================= */
+var NS='http://www.w3.org/2000/svg';
+function E(t,a,p){var n=document.createElementNS(NS,t),k;for(k in a){if(a.hasOwnProperty(k))n.setAttribute(k,a[k]);}if(p)p.appendChild(n);return n;}
+function T(p,x,y,s,a){var t=E('text',Object.assign({x:x,y:y},a||{}),p);t.textContent=s;return t;}
+function rad(d){return d*Math.PI/180;}
+function dist(dx,dy){return Math.sqrt(dx*dx+dy*dy);}
+function angDiff(a,b){var d=Math.abs(a-b)%360;return d>180?360-d:d;}
+function clearNode(n){while(n.firstChild)n.removeChild(n.firstChild);}
+function showErr(name,err){var d=document.getElementById('errbox');d.style.display='block';d.innerHTML+='<b>'+name+'</b> : '+err+'<br>';}
+function safe(name,fn){try{fn();}catch(err){showErr(name,err&&err.message?err.message:err);}}
+
+function svgPoint(svg,cx,cy){
+  var r=svg.getBoundingClientRect();
+  var vb=(svg.viewBox&&svg.viewBox.baseVal)?svg.viewBox.baseVal:{x:0,y:0,width:1000,height:640};
+  if(r.width===0||r.height===0)return{x:-999,y:-999};
+  var scale=Math.min(r.width/vb.width,r.height/vb.height);
+  var ox=r.left+(r.width-vb.width*scale)/2;
+  var oy=r.top+(r.height-vb.height*scale)/2;
+  return{x:(cx-ox)/scale+vb.x,y:(cy-oy)/scale+vb.y};
+}
+function addGradient(svg,id,c1,c2){
+  var defs=E('defs',{},svg);
+  var lg=E('linearGradient',{id:id,x1:0,y1:0,x2:0,y2:1},defs);
+  E('stop',{offset:'0','stop-color':c1},lg);
+  E('stop',{offset:'1','stop-color':c2},lg);
+}
+
+/* ---------- côtes simplifiées mais réalistes (Atlantique Nord) ---------- */
+var LAND=[
+ 'M0,0 L250,0 C240,60 235,110 230,150 C220,190 205,210 200,225 C185,250 160,262 150,278 C160,295 180,295 186,302 C180,320 155,330 140,342 C120,352 105,350 100,354 C80,390 60,405 50,428 C35,470 25,495 18,520 C10,545 5,560 0,570 Z',
+ 'M300,0 L430,0 C420,40 405,70 400,90 C385,130 370,150 355,162 C340,150 330,120 322,90 C312,60 305,30 300,0 Z',
+ 'M565,105 C575,85 600,78 625,84 C650,90 660,105 652,120 C640,135 610,138 590,132 C572,127 560,118 565,105 Z',
+ 'M700,225 C705,210 720,205 730,212 C738,220 736,240 728,252 C720,262 706,258 700,246 C697,238 697,232 700,225 Z',
+ 'M775,175 C785,160 800,158 806,170 C812,182 806,196 800,210 C795,225 800,240 792,252 C782,262 770,256 768,242 C766,228 770,214 772,200 C773,190 771,183 775,175 Z',
+ 'M1000,0 L940,0 C925,40 905,80 890,115 C875,150 855,175 842,198 C850,215 862,225 866,236 C858,246 852,246 848,250 C820,268 790,278 762,288 C770,305 778,318 780,331 C760,338 740,338 722,342 C714,360 710,378 708,395 C716,405 730,412 742,417 C780,420 830,424 880,428 C920,431 960,432 1000,433 Z',
+ 'M758,438 C740,452 722,465 710,480 C690,515 668,550 652,586 C644,605 636,622 630,640 L1000,640 L1000,442 C900,440 820,438 758,438 Z'
+];
+function buildBase(svg,seaId){
+  addGradient(svg,seaId,'#cde9f9','#93cde9');
+  E('rect',{x:0,y:0,width:1000,height:640,fill:'url(#'+seaId+')'},svg);
+  var i;
+  for(i=0;i<LAND.length;i++)E('path',{d:LAND[i],fill:'#efe6cf',stroke:'#c3b28d','stroke-width':1.5},svg);
+  T(svg,28,120,'AMÉRIQUE DU NORD',{'font-size':12,fill:'#a08c62'});
+  T(svg,325,60,'GROENLAND',{'font-size':11,fill:'#a08c62'});
+  T(svg,583,155,'Islande',{'font-size':11,fill:'#a08c62'});
+  T(svg,866,320,'EUROPE',{'font-size':12,fill:'#a08c62'});
+  T(svg,862,560,'AFRIQUE',{'font-size':12,fill:'#a08c62'});
+  T(svg,330,480,'OCÉAN ATLANTIQUE',{'font-size':15,fill:'#4a7ba6','font-style':'italic'});
+  var g=E('g',{transform:'translate(480,64)'},svg);
+  E('polygon',{points:'0,-16 6,8 0,2 -6,8',fill:'#333'},g);
+  T(g,0,22,'N',{'font-size':12,fill:'#333','text-anchor':'middle','font-weight':'bold'});
+}
+
+/* ---------- champ de pression : DEUX zones (2 creux + 2 bosses) ---------- */
+function gauss(x,y,cx,cy,sx,sy){
+  var dx=(x-cx)/sx,dy=(y-cy)/sy;
+  return Math.exp(-(dx*dx+dy*dy)/2);
+}
+function P(x,y){
+  var base=1015;
+  base+=26*gauss(x,y,545,395,160,140);  // A1 anticyclone (zone 1, est)
+  base-=26*gauss(x,y,610,115,160,140);  // D1 dépression   (zone 1, est)
+  base+=24*gauss(x,y,320,210,150,140);  // A2 anticyclone (zone 2, ouest)
+  base-=24*gauss(x,y,330,470,150,140);  // D2 dépression   (zone 2, ouest)
+  return base;
+}
+var centers=[
+ {x:610,y:115,letter:'D₁',col:'#c92a2a'},
+ {x:545,y:395,letter:'A₁',col:'#1864ab'},
+ {x:320,y:210,letter:'A₂',col:'#1864ab'},
+ {x:330,y:470,letter:'D₂',col:'#c92a2a'}
+];
+function buildCenters(svg){
+  centers.forEach(function(c){
+    var val=Math.round(P(c.x,c.y));
+    T(svg,c.x,c.y+8,c.letter,{'font-size':30,'font-weight':'bold',fill:c.col,'text-anchor':'middle'});
+    T(svg,c.x,c.y+30,'≈'+val+' hPa',{'font-size':12,fill:'#333','text-anchor':'middle'});
+  });
+}
+function buildIsobars(svg){
+  var step=5,cols=201,rows=129,v=new Float64Array(cols*rows),ix,iy;
+  for(iy=0;iy<rows;iy++)for(ix=0;ix<cols;ix++)v[iy*cols+ix]=P(ix*step,iy*step);
+  function lerp(l,a,b){var d=b-a;return d===0?0.5:(l-a)/d;}
+  var levels=[995,1000,1005,1010,1015,1020,1025,1030,1035];
+  levels.forEach(function(lv){
+    var d='';
+    for(iy=0;iy<rows-1;iy++)for(ix=0;ix<cols-1;ix++){
+      var a=v[iy*cols+ix],b=v[iy*cols+ix+1],c=v[(iy+1)*cols+ix+1],e=v[(iy+1)*cols+ix];
+      var idx=(a>lv?8:0)|(b>lv?4:0)|(c>lv?2:0)|(e>lv?1:0);
+      if(idx===0||idx===15)continue;
+      var x=ix*step,y=iy*step;
+      var Tp=[x+lerp(lv,a,b)*step,y],Rp=[x+step,y+lerp(lv,b,c)*step],Bp=[x+lerp(lv,e,c)*step,y+step],Lp=[x,y+lerp(lv,a,e)*step];
+      var CASES={1:[[Lp,Bp]],2:[[Bp,Rp]],3:[[Lp,Rp]],4:[[Tp,Rp]],5:[[Tp,Rp],[Lp,Bp]],6:[[Tp,Bp]],7:[[Tp,Lp]],8:[[Tp,Lp]],9:[[Tp,Bp]],10:[[Tp,Lp],[Bp,Rp]],11:[[Tp,Rp]],12:[[Lp,Rp]],13:[[Bp,Rp]],14:[[Lp,Bp]]};
+      CASES[idx].forEach(function(s){d+='M'+s[0][0].toFixed(1)+','+s[0][1].toFixed(1)+'L'+s[1][0].toFixed(1)+','+s[1][1].toFixed(1);});
+    }
+    E('path',{d:d,fill:'none',stroke:'#48699a','stroke-width':1.4,opacity:.9},svg);
+    if(lv%10===0){
+      for(var iy2=12;iy2<rows-1;iy2++){
+        var a2=v[iy2*cols+100],b2=v[(iy2+1)*cols+100];
+        if((a2-lv)*(b2-lv)<0){T(svg,500,iy2*step+3,String(lv),{'font-size':10,fill:'#48699a',stroke:'#ffffff','stroke-width':3,'paint-order':'stroke','text-anchor':'middle'});break;}
+      }
+    }
+  });
+}
+function windDir(x,y){var h=3,gx=P(x+h,y)-P(x-h,y),gy=P(x,y+h)-P(x,y-h);return Math.atan2(-gy,-gx)*180/Math.PI;}
+
+/* ---------- flèches ---------- */
+function drawArrow(parent,x,y,ang,len,stroke,w,cls){
+  var g=E('g',{},parent);if(cls)g.setAttribute('class',cls);
+  var r=rad(ang),ux=Math.cos(r),uy=Math.sin(r),vx=-uy,vy=ux;
+  var sx=x+16*ux,sy=y+16*uy,ex=x+(16+len)*ux,ey=y+(16+len)*uy;
+  var line=E('line',{x1:sx,y1:sy,x2:ex,y2:ey,stroke:stroke,'stroke-width':w,'stroke-linecap':'round'},g);
+  var tx=ex+13*ux,ty=ey+13*uy;
+  var head=E('polygon',{points:tx+','+ty+' '+(ex+5*ux+6.5*vx)+','+(ey+5*uy+6.5*vy)+' '+(ex+5*ux-6.5*vx)+','+(ey+5*uy-6.5*vy),fill:stroke},g);
+  return{g:g,line:line,head:head};
+}
+function drawFreeArrow(parent,x,y,ang,len,stroke,w,op){
+  var g=E('g',{},parent);
+  var r=rad(ang),ux=Math.cos(r),uy=Math.sin(r),vx=-uy,vy=ux;
+  var sx=x-(len/2)*ux,sy=y-(len/2)*uy,ex=x+(len/2)*ux,ey=y+(len/2)*uy;
+  E('line',{x1:sx,y1:sy,x2:ex,y2:ey,stroke:stroke,'stroke-width':w,'stroke-linecap':'round',opacity:op||1},g);
+  var tx=ex+9*ux,ty=ey+9*uy;
+  E('polygon',{points:tx+','+ty+' '+(ex+4*ux+5*vx)+','+(ey+4*uy+5*vy)+' '+(ex+4*ux-5*vx)+','+(ey+4*uy-5*vy),fill:stroke,opacity:op||1},g);
+  return g;
+}
+
+/* ---------- moteur des deux activités ---------- */
+function initActivity(cfg){
+  var svg=document.getElementById(cfg.svgId);
+  if(!svg){showErr(cfg.svgId,'élément introuvable');return;}
+  clearNode(svg);
+  buildBase(svg,cfg.seaId);
+  cfg.buildData(svg);
+  var gCorr=E('g',{},svg),gStud=E('g',{},svg),gSt=E('g',{},svg);
+  var stEls=cfg.stations.map(function(s,i){
+    var g=E('g',{},gSt);g.setAttribute('class','st');
+    E('circle',{cx:s.x,cy:s.y,r:13},g);
+    T(g,s.x,s.y+4.5,String(i+1),{'text-anchor':'middle'});
+    return g;
+  });
+  var angles=cfg.stations.map(function(){return null;});
+  var arrows=cfg.stations.map(function(){return null;});
+  var drag=null,temp=null;
+
+  function find(p){
+    for(var i=0;i<cfg.stations.length;i++){
+      var s=cfg.stations[i];
+      if(dist(p.x-s.x,p.y-s.y)<30)return i;
+    }
+    return -1;
+  }
+  svg.addEventListener('pointerdown',function(e){
+    var p=svgPoint(svg,e.clientX,e.clientY),i=find(p);
+    if(i>=0){drag=i;stEls[i].setAttribute('class','st');if(e.preventDefault)e.preventDefault();}
+  });
+  window.addEventListener('pointermove',function(e){
+    if(drag===null)return;
+    var p=svgPoint(svg,e.clientX,e.clientY),s=cfg.stations[drag],dx=p.x-s.x,dy=p.y-s.y;
+    if(temp){temp.g.parentNode.removeChild(temp.g);temp=null;}
+    if(dist(dx,dy)>10)temp=drawArrow(gStud,s.x,s.y,Math.atan2(dy,dx)*180/Math.PI,46,'#e8590c',5);
+  });
+  function endDrag(e){
+    if(drag===null)return;
+    var p=svgPoint(svg,e.clientX,e.clientY),s=cfg.stations[drag],dx=p.x-s.x,dy=p.y-s.y;
+    if(temp){temp.g.parentNode.removeChild(temp.g);temp=null;}
+    if(dist(dx,dy)>=18){
+      var ang=Math.atan2(dy,dx)*180/Math.PI;
+      angles[drag]=ang;
+      if(arrows[drag])arrows[drag].g.parentNode.removeChild(arrows[drag].g);
+      arrows[drag]=drawArrow(gStud,s.x,s.y,ang,46,'#e8590c',5);
+    }
+    drag=null;
+  }
+  window.addEventListener('pointerup',endDrag);
+  window.addEventListener('pointercancel',function(){if(temp){temp.g.parentNode.removeChild(temp.g);temp=null;}drag=null;});
+
+  document.getElementById(cfg.verify).addEventListener('click',function(){
+    if(angles.some(function(a){return a===null;})){
+      document.getElementById(cfg.msg).textContent='✏️ Dessine une flèche sur tous les points numérotés !';return;
+    }
+    var good=0;
+    cfg.stations.forEach(function(s,i){
+      var ok=angDiff(angles[i],cfg.expected[i])<=45;
+      if(ok)good++;
+      stEls[i].setAttribute('class','st '+(ok?'ok':'bad'));
+      var c=ok?'#2f9e44':'#e03131';
+      arrows[i].line.setAttribute('stroke',c);arrows[i].head.setAttribute('fill',c);
+    });
+    var m=document.getElementById(cfg.msg);
+    if(good===cfg.stations.length)m.textContent='🎉 Bravo ! '+cfg.success;
+    else m.textContent=good+'/'+cfg.stations.length+' correctes. 💡 '+cfg.hint;
+  });
+  document.getElementById(cfg.corr).addEventListener('click',function(){
+    clearNode(gCorr);
+    cfg.stations.forEach(function(s,i){drawArrow(gCorr,s.x,s.y,cfg.expected[i],52,'#1971c2',5,'corr');});
+    var ex=document.getElementById(cfg.expl);
+    ex.classList.remove('hidden');
+    if(ex.scrollIntoView)ex.scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+  document.getElementById(cfg.reset).addEventListener('click',function(){
+    clearNode(gStud);clearNode(gCorr);
+    angles=cfg.stations.map(function(){return null;});
+    arrows=cfg.stations.map(function(){return null;});
+    stEls.forEach(function(g){g.setAttribute('class','st');});
+    document.getElementById(cfg.msg).textContent='';
+    document.getElementById(cfg.expl).classList.add('hidden');
+  });
+}
+
+/* ---------- ACTIVITÉ 1 : vents (2 zones, 2 points/zone) ---------- */
+var windStations=[
+ {x:570,y:300},  // zone 1
+ {x:600,y:195},  // zone 1
+ {x:325,y:330},  // zone 2
+ {x:350,y:410}   // zone 2
+];
+safe('Activité vents',function(){
+  initActivity({
+    svgId:'svgVent',seaId:'seaV',verify:'ventVerify',corr:'ventCorr',reset:'ventReset',msg:'ventMsg',expl:'ventExpl',
+    stations:windStations,
+    expected:windStations.map(function(s){return windDir(s.x,s.y);}),
+    buildData:function(svg){buildIsobars(svg);buildCenters(svg);},
+    hint:'Observe chaque zone : le vent souffle des HAUTES pressions (A) vers les BASSES pressions (D), perpendiculairement aux isobares.',
+    success:'Dans les deux zones, le vent va bien des hautes vers les basses pressions : c’est la différence de pression qui le met en mouvement !'
+  });
+});
+
+/* ---------- ACTIVITÉ 2 : courants (+ vents dominants en aide) ---------- */
+var curStations=[
+ {x:105,y:430,exp:-45},{x:430,y:308,exp:-5},{x:700,y:268,exp:-35},
+ {x:205,y:255,exp:95},{x:700,y:450,exp:105},{x:400,y:622,exp:180}
+];
+safe('Activité courants',function(){
+  initActivity({
+    svgId:'svgCourant',seaId:'seaC',verify:'courantVerify',corr:'courantCorr',reset:'courantReset',msg:'courantMsg',expl:'courantExpl',
+    stations:curStations.map(function(s){return{x:s.x,y:s.y};}),
+    expected:curStations.map(function(s){return s.exp;}),
+    buildData:function(svg){
+      function band(d,c){E('path',{d:d,fill:'none',stroke:c,'stroke-width':13,'stroke-linecap':'round',opacity:.8},svg);}
+      band('M18,545 C60,470 100,430 132,398 C165,368 195,350 235,341 C305,326 365,316 435,309 C525,301 605,291 685,273 C735,261 775,241 805,214','#fa5252');
+      band('M642,616 C520,624 380,627 240,624 C180,622 120,619 58,616','#fa5252');
+      band('M238,158 C228,200 212,240 202,272 C195,294 186,312 176,327','#4dabf7');
+      band('M737,352 C722,392 707,432 692,472 C677,512 662,552 650,592','#4dabf7');
+      // vents dominants (aide discrète)
+      var gWind=E('g',{},svg);gWind.setAttribute('opacity','0.75');
+      var windHint=[
+        {x:380,y:245,dir:0},{x:470,y:258,dir:-6},{x:560,y:243,dir:0},
+        {x:380,y:575,dir:180},{x:470,y:588,dir:180},{x:560,y:573,dir:176}
+      ];
+      windHint.forEach(function(w){drawFreeArrow(gWind,w.x,w.y,w.dir,34,'#78909c',3,0.8);});
+      T(svg,470,222,'Vents d’ouest',{'font-size':12,fill:'#607d8b','text-anchor':'middle','font-style':'italic'});
+      T(svg,470,553,'Alizés',{'font-size':12,fill:'#607d8b','text-anchor':'middle','font-style':'italic'});
+      // libellés des courants
+      T(svg,255,290,'Gulf Stream (chaud)',{'font-size':12,fill:'#c92a2a','font-weight':'bold'});
+      T(svg,555,262,'Dérive nord-atlantique (chaud)',{'font-size':11,fill:'#c92a2a'});
+      T(svg,300,600,'Courant équatorial (chaud)',{'font-size':11,fill:'#c92a2a'});
+      T(svg,95,205,'Courant du',{'font-size':11,fill:'#1864ab'});
+      T(svg,95,218,'Labrador (froid)',{'font-size':11,fill:'#1864ab'});
+      T(svg,560,470,'Courant des Canaries (froid)',{'font-size':11,fill:'#1864ab'});
+      var tog=document.getElementById('courantWindToggle');
+      if(tog){tog.addEventListener('change',function(){gWind.style.display=tog.checked?'':'none';});}
+    },
+    hint:'Courant chaud = équateur → pôle ; courant froid = pôle → équateur. Aide-toi des vents dominants (flèches grises) !',
+    success:'Les courants chauds vont de l’équateur vers les pôles, les courants froids des pôles vers l’équateur : la Terre redistribue la chaleur.'
+  });
+});
+
+/* ---------- onglet 3 : animations ---------- */
+var loops=[];
+function makeParticles(pathEl,n,fill,r){
+  var len=pathEl.getTotalLength(),pts=[],i;
+  for(i=0;i<n;i++)pts.push(E('circle',{r:r,fill:fill,opacity:.85},pathEl.parentNode));
+  loops.push({path:pathEl,len:len,pts:pts,n:n});
+}
+safe('Animation air',function(){
+  var svg=document.getElementById('svgAir');
+  addGradient(svg,'skyA','#d7ecff','#f6fbff');
+  E('rect',{x:0,y:0,width:900,height:430,fill:'url(#skyA)'},svg);
+  E('circle',{cx:110,cy:70,r:26,fill:'#ffd43b',stroke:'#fab005','stroke-width':3},svg);
+  for(var i=0;i<8;i++){var a=rad(i*45);E('line',{x1:110+34*Math.cos(a),y1:70+34*Math.sin(a),x2:110+48*Math.cos(a),y2:70+48*Math.sin(a),stroke:'#fab005','stroke-width':3},svg);}
+  E('rect',{x:0,y:360,width:450,height:70,fill:'#e8590c'},svg);
+  E('rect',{x:450,y:360,width:450,height:70,fill:'#a5d8ff'},svg);
+  T(svg,225,400,'ÉQUATEUR (chaud)',{'font-size':15,fill:'#fff','text-anchor':'middle','font-weight':'bold'});
+  T(svg,675,400,'PÔLE (froid)',{'font-size':15,fill:'#1864ab','text-anchor':'middle','font-weight':'bold'});
+  [180,225,270].forEach(function(x){E('line',{x1:x,y1:330,x2:x,y2:225,stroke:'#e8590c','stroke-width':5,'class':'flowline'},svg);E('polygon',{points:x+',205 '+(x-8)+',228 '+(x+8)+',228',fill:'#e8590c'},svg);});
+  [630,675,720].forEach(function(x){E('line',{x1:x,y1:225,x2:x,y2:330,stroke:'#1971c2','stroke-width':5,'class':'flowline'},svg);E('polygon',{points:x+',350 '+(x-8)+',327 '+(x+8)+',327',fill:'#1971c2'},svg);});
+  T(svg,225,180,'ANTICYCLONE : AIR CHAUD = plus léger',{'font-size':13,fill:'#c92a2a','text-anchor':'middle','font-weight':'bold'});
+  T(svg,225,196,'il MONTE → BASSES PRESSIONS',{'font-size':12,fill:'#c92a2a','text-anchor':'middle'});
+  T(svg,675,180,'DEPRESSION : AIR FROID = plus lourd',{'font-size':13,fill:'#1864ab','text-anchor':'middle','font-weight':'bold'});
+  T(svg,675,196,'il DESCEND → HAUTES PRESSIONS',{'font-size':12,fill:'#1864ab','text-anchor':'middle'});
+  E('line',{x1:600,y1:345,x2:320,y2:345,stroke:'#212529','stroke-width':5,'class':'flowline'},svg);
+  E('polygon',{points:'300,345 325,336 325,354',fill:'#212529'},svg);
+  T(svg,460,332,'VENT : des HAUTES vers les BASSES pressions',{'font-size':13,fill:'#212529','text-anchor':'middle','font-weight':'bold'});
+  E('line',{x1:300,y1:120,x2:580,y2:120,stroke:'#868e96','stroke-width':4,'class':'flowline'},svg);
+  E('polygon',{points:'600,120 575,111 575,129',fill:'#868e96'},svg);
+  T(svg,450,105,'retour en altitude',{'font-size':11,fill:'#868e96','text-anchor':'middle'});
+  var loop=E('path',{d:'M250,345 C240,220 320,150 450,145 C580,150 660,220 650,345 C520,352 380,352 250,345 Z',fill:'none',stroke:'none'},svg);
+  makeParticles(loop,10,'#ffffff',4);
+});
+safe('Animation eau',function(){
+  var svg=document.getElementById('svgEau');
+  addGradient(svg,'skyB','#d7ecff','#f6fbff');
+  addGradient(svg,'eauA','#74c0fc','#1864ab');
+  E('rect',{x:0,y:0,width:900,height:70,fill:'url(#skyB)'},svg);
+  E('rect',{x:0,y:70,width:900,height:210,fill:'url(#eauA)'},svg);
+  T(svg,110,55,'ÉQUATEUR (chaud)',{'font-size':14,fill:'#c92a2a','text-anchor':'middle','font-weight':'bold'});
+  T(svg,790,55,'PÔLE (froid)',{'font-size':14,fill:'#1864ab','text-anchor':'middle','font-weight':'bold'});
+  E('path',{d:'M110,110 C400,96 620,96 770,118',fill:'none',stroke:'#fa5252','stroke-width':11,'stroke-linecap':'round'},svg);
+  E('polygon',{points:'790,121 762,108 766,128',fill:'#fa5252'},svg);
+  T(svg,450,90,'Courant chaud de surface : équateur → pôle',{'font-size':13,fill:'#c92a2a','text-anchor':'middle','font-weight':'bold'});
+  E('path',{d:'M790,225 C600,242 300,242 130,224',fill:'none',stroke:'#4dabf7','stroke-width':11,'stroke-linecap':'round'},svg);
+  E('polygon',{points:'110,222 138,212 134,232',fill:'#4dabf7'},svg);
+  T(svg,450,262,'Courant froid profond : pôle → équateur',{'font-size':13,fill:'#ffffff','text-anchor':'middle','font-weight':'bold'});
+  var loop=E('path',{d:'M120,115 C400,100 620,100 780,122 L780,222 C600,238 300,238 120,220 Z',fill:'none',stroke:'none'},svg);
+  makeParticles(loop,10,'#ffffff',4);
+});
+safe('Boucle animation',function(){
+  var t0=null;
+  function frame(t){
+    if(t0===null)t0=t;
+    loops.forEach(function(L){
+      for(var i=0;i<L.n;i++){
+        var d=(t*0.06+i*L.len/L.n)%L.len,p=L.path.getPointAtLength(d);
+        L.pts[i].setAttribute('cx',p.x);L.pts[i].setAttribute('cy',p.y);
+      }
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+});
+
+/* ---------- quiz ---------- */
+safe('Quiz',function(){
+  var QUIZ=[
+   {q:'1. Le vent souffle…',r:['des basses pressions vers les hautes pressions','des hautes pressions vers les basses pressions','toujours du nord vers le sud'],ok:1,fb:'L’air se déplace des hautes vers les basses pressions.'},
+   {q:'2. L’air chaud…',r:['monte, car il est plus léger','descend, car il est plus lourd','ne bouge pas'],ok:0,fb:'Plus léger, il monte et crée des basses pressions.'},
+   {q:'3. Les différences de température créent…',r:['des différences de pression','des montagnes','rien du tout'],ok:0,fb:'Température → pression : c’est le moteur des vents et des courants !'},
+   {q:'4. Le Gulf Stream transporte de l’eau…',r:['chaude de l’équateur vers les pôles','froide des pôles vers l’équateur'],ok:0,fb:'Il adoucit le climat de l’Europe de l’Ouest.'}
+  ];
+  var quizDiv=document.getElementById('quiz');
+  QUIZ.forEach(function(q){
+    var box=document.createElement('div');box.className='quizq';
+    box.innerHTML='<b>'+q.q+'</b>';
+    var feed=document.createElement('div');feed.className='qfeed';
+    q.r.forEach(function(r,i){
+      var b=document.createElement('button');b.type='button';b.className='qbtn';b.textContent=r;
+      b.addEventListener('click',function(){
+        var all=box.querySelectorAll('.qbtn');
+        for(var k=0;k<all.length;k++){all[k].classList.remove('good');all[k].classList.remove('bad');}
+        b.classList.add(i===q.ok?'good':'bad');
+        if(i===q.ok){feed.textContent='✅ Exact ! '+q.fb;feed.style.color='#2f9e44';}
+        else{feed.textContent='❌ Non… '+q.fb;feed.style.color='#e03131';}
+      });
+      box.appendChild(b);
+    });
+    box.appendChild(feed);quizDiv.appendChild(box);
+  });
+});
+
+/* ---------- onglets ---------- */
+safe('Onglets',function(){
+  var tabs=document.querySelectorAll('.tab');
+  for(var i=0;i<tabs.length;i++){
+    tabs[i].addEventListener('click',function(){
+      for(var j=0;j<tabs.length;j++)tabs[j].classList.remove('active');
+      var panels=document.querySelectorAll('.panel');
+      for(var j2=0;j2<panels.length;j2++)panels[j2].classList.remove('active');
+      this.classList.add('active');
+      document.getElementById('tab-'+this.getAttribute('data-tab')).classList.add('active');
+    });
+  }
+});
+</script>
+</body>
+</html>
