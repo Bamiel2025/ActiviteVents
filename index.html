@@ -85,10 +85,10 @@
       <span id="ventMsg" class="msg"></span>
     </div>
     <div id="ventExpl" class="expl hidden">
-      <b>✅ Correction :</b> les flèches bleues animées montrent le sens du vent. Dans <b>chaque zone</b>, le vent souffle des <b>HAUTES pressions (A) vers les BASSES pressions (D)</b>, perpendiculairement aux isobares.
+      <b>✅ Correction :</b> les flèches bleues animées montrent la direction de la poussée de l'air. Dans <b>chaque zone</b>, l'air est poussé des <b>HAUTES pressions (A) vers les BASSES pressions (D)</b> : c'est la force de pression, perpendiculaire aux isobares.
       Zone 1 : de A₁ vers D₁ (vers le nord). Zone 2 : de A₂ vers D₂ (vers le sud) — l'orientation est différente, il fallait bien regarder !
       <div class="moteur">🔑 LE MOTEUR DU VENT : la <b>différence de pression</b>, elle-même créée par la <b>différence de température</b> : l'air chaud, plus léger, monte → basses pressions ; l'air froid, plus lourd, descend → hautes pressions. (Voir onglet 3)</div>
-      ➡️ <i>Pour aller plus loin :</i> à cause de la rotation de la Terre, les vents tournent autour des pressions (sens inverse des aiguilles d'une montre autour d'une dépression dans l'hémisphère Nord).
+      ➡️ <i>Pour aller plus loin :</i> à cause de la rotation de la Terre, les vents réels ne vont pas tout droit : ils tournent autour des centres de pression (sens inverse des aiguilles d'une montre autour d'une dépression dans l'hémisphère Nord, sens des aiguilles d'une montre autour d'un anticyclone).
     </div>
   </div>
 </section>
@@ -112,8 +112,8 @@
       <span id="courantMsg" class="msg"></span>
     </div>
     <div id="courantExpl" class="expl hidden">
-      <b>✅ Correction :</b> les courants <b>chauds</b> (Gulf Stream, dérive nord-atlantique, courant équatorial) partent des régions chaudes (<b>équateur → pôles</b>). Les courants <b>froids</b> (Labrador, Canaries) partent des régions froides (<b>pôles → équateur</b>). Le Gulf Stream adoucit ainsi le climat de l'Europe !
-      <div class="moteur">🔑 MÊME MOTEUR QUE LE VENT : les <b>différences de température</b> (l'eau chaude, plus légère, circule en surface ; l'eau froide, plus dense, plonge) et les <b>vents</b> qui poussent l'eau en surface. La Terre redistribue ainsi la chaleur de l'équateur vers les pôles.</div>
+      <b>✅ Correction :</b> les courants <b>chauds</b> (Gulf Stream, dérive nord-atlantique) transportent de l'eau chaude des régions chaudes vers les pôles (<b>équateur → pôles</b>). Le <b>courant équatorial</b>, lui aussi chaud, circule d'est en ouest près de l'équateur. Les courants <b>froids</b> (Labrador, Canaries) partent des régions froides et se dirigent vers l'équateur (<b>pôles → équateur</b>). Le Gulf Stream adoucit ainsi le climat de l'Europe !
+      <div class="moteur">🔑 LES MOTEURS DES COURANTS : les <b>vents</b> poussent l'eau en surface et les <b>différences de température et de densité</b> font circuler l'eau en profondeur (l'eau chaude, plus légère, reste en surface ; l'eau froide, plus dense, plonge). La Terre redistribue ainsi la chaleur de l'équateur vers les pôles.</div>
     </div>
   </div>
 </section>
@@ -122,13 +122,13 @@
 <section id="tab-comprendre" class="panel">
   <div class="card">
     <h2>3 · Le moteur : température → pression → mouvement</h2>
-    <p class="consigne">Observe l'animation : c'est le <b>Soleil</b> qui chauffe inégalement la Terre. Les différences de température créent des différences de pression… et l'air (comme l'eau) se déplace des hautes vers les basses pressions.</p>
+    <p class="consigne">Observe l'animation : c'est le <b>Soleil</b> qui chauffe inégalement la Terre. Les différences de température créent des différences de pression… et l'air se déplace des hautes vers les basses pressions. Dans l'océan, les différences de température et de densité, ainsi que les vents, mettent l'eau en mouvement.</p>
     <div class="mapwrap"><svg id="svgAir" viewBox="0 0 900 430"></svg></div>
     <div class="steps">
       <div class="step"><b>1.</b> ☀️ Le Soleil chauffe davantage l'équateur que les pôles.</div>
       <div class="step"><b>2.</b> 🔥 L'air chaud, plus léger, <b>monte</b> → cela crée des <b>basses pressions</b>.</div>
       <div class="step"><b>3.</b> ❄️ L'air froid, plus lourd, <b>descend</b> → cela crée des <b>hautes pressions</b>.</div>
-      <div class="step"><b>4.</b> 💨 L'air se déplace des hautes vers les basses pressions : c'est le <b>VENT</b>. Dans l'océan, le même moteur + les vents créent les <b>COURANTS</b>.</div>
+      <div class="step"><b>4.</b> 💨 L'air se déplace des hautes vers les basses pressions : c'est le <b>VENT</b>. Dans l'océan, les différences de température et de densité, plus les vents, créent les <b>COURANTS</b>.</div>
     </div>
     <div class="mapwrap" style="margin-top:14px"><svg id="svgEau" viewBox="0 0 900 300"></svg></div>
     <h2 style="margin-top:20px">🧠 Petit quiz de vérification</h2>
@@ -362,8 +362,8 @@ safe('Activité vents',function(){
     stations:windStations,
     expected:windStations.map(function(s){return windDir(s.x,s.y);}),
     buildData:function(svg){buildIsobars(svg);buildCenters(svg);},
-    hint:'Observe chaque zone : le vent souffle des HAUTES pressions (A) vers les BASSES pressions (D), perpendiculairement aux isobares.',
-    success:'Dans les deux zones, le vent va bien des hautes vers les basses pressions : c’est la différence de pression qui le met en mouvement !'
+    hint:'Observe chaque zone : l’air est poussé des HAUTES pressions (A) vers les BASSES pressions (D).',
+    success:'Dans les deux zones, l’air est bien poussé des hautes vers les basses pressions : c’est la différence de pression qui met le vent en mouvement !'
   });
 });
 
@@ -396,14 +396,14 @@ safe('Activité courants',function(){
       T(svg,255,290,'Gulf Stream (chaud)',{'font-size':12,fill:'#c92a2a','font-weight':'bold'});
       T(svg,555,262,'Dérive nord-atlantique (chaud)',{'font-size':11,fill:'#c92a2a'});
       T(svg,300,600,'Courant équatorial (chaud)',{'font-size':11,fill:'#c92a2a'});
-      T(svg,95,205,'Courant du',{'font-size':11,fill:'#1864ab'});
-      T(svg,95,218,'Labrador (froid)',{'font-size':11,fill:'#1864ab'});
+      T(svg,245,205,'Courant du',{'font-size':11,fill:'#1864ab'});
+      T(svg,245,218,'Labrador (froid)',{'font-size':11,fill:'#1864ab'});
       T(svg,560,470,'Courant des Canaries (froid)',{'font-size':11,fill:'#1864ab'});
       var tog=document.getElementById('courantWindToggle');
       if(tog){tog.addEventListener('change',function(){gWind.style.display=tog.checked?'':'none';});}
     },
-    hint:'Courant chaud = équateur → pôle ; courant froid = pôle → équateur. Aide-toi des vents dominants (flèches grises) !',
-    success:'Les courants chauds vont de l’équateur vers les pôles, les courants froids des pôles vers l’équateur : la Terre redistribue la chaleur.'
+    hint:'Un courant chaud transporte de l’eau chaude vers les pôles (Gulf Stream) ; un courant froid transporte de l’eau froide vers l’équateur (Labrador, Canaries). Aide-toi des vents dominants (flèches grises) !',
+    success:'Globalement, les courants chauds vont de l’équateur vers les pôles et les courants froids des pôles vers l’équateur : la Terre redistribue la chaleur.'
   });
 });
 
@@ -426,9 +426,9 @@ safe('Animation air',function(){
   T(svg,675,400,'PÔLE (froid)',{'font-size':15,fill:'#1864ab','text-anchor':'middle','font-weight':'bold'});
   [180,225,270].forEach(function(x){E('line',{x1:x,y1:330,x2:x,y2:225,stroke:'#e8590c','stroke-width':5,'class':'flowline'},svg);E('polygon',{points:x+',205 '+(x-8)+',228 '+(x+8)+',228',fill:'#e8590c'},svg);});
   [630,675,720].forEach(function(x){E('line',{x1:x,y1:225,x2:x,y2:330,stroke:'#1971c2','stroke-width':5,'class':'flowline'},svg);E('polygon',{points:x+',350 '+(x-8)+',327 '+(x+8)+',327',fill:'#1971c2'},svg);});
-  T(svg,225,180,'ANTICYCLONE : AIR CHAUD = plus léger',{'font-size':13,fill:'#c92a2a','text-anchor':'middle','font-weight':'bold'});
+  T(svg,225,180,'DÉPRESSION (D) : AIR CHAUD = plus léger',{'font-size':13,fill:'#c92a2a','text-anchor':'middle','font-weight':'bold'});
   T(svg,225,196,'il MONTE → BASSES PRESSIONS',{'font-size':12,fill:'#c92a2a','text-anchor':'middle'});
-  T(svg,675,180,'DEPRESSION : AIR FROID = plus lourd',{'font-size':13,fill:'#1864ab','text-anchor':'middle','font-weight':'bold'});
+  T(svg,675,180,'ANTICYCLONE (A) : AIR FROID = plus lourd',{'font-size':13,fill:'#1864ab','text-anchor':'middle','font-weight':'bold'});
   T(svg,675,196,'il DESCEND → HAUTES PRESSIONS',{'font-size':12,fill:'#1864ab','text-anchor':'middle'});
   E('line',{x1:600,y1:345,x2:320,y2:345,stroke:'#212529','stroke-width':5,'class':'flowline'},svg);
   E('polygon',{points:'300,345 325,336 325,354',fill:'#212529'},svg);
